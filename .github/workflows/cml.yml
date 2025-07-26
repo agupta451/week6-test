@@ -1,0 +1,46 @@
+name: Iris CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  train-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        pip install -r app/requirements.txt
+        pip install pytest
+
+    - name: Test API
+      run: pytest test_iris_api.py
+
+    - name: Build Docker image
+      run: docker build -t iris-api .
+
+    - name: Authenticate Docker with GCP
+      env:
+        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_KEY }}
+      run: |
+        echo "$GOOGLE_APPLICATION_CREDENTIALS" > gcloud-key.json
+        gcloud auth activate-service-account --key-file=gcloud-key.json
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Tag & Push to GCP Artifact Registry
+      run: |
+        docker tag iris-api us-central1-docker.pkg.dev/silicon-synapse-461513-v6/my-repo/iris-api:latest
+        docker push us-central1-docker.pkg.dev/silicon-synapse-461513-v6/my-repo/iris-api:latest
+
+    - name: Deploy to GKE 
+      run: |
+        gcloud container clusters get-credentials test-iris-v1 --zone us-central1 --project silicon-synapse-461513-v6
+        kubectl apply -f k8s/iris-deployment.yaml
