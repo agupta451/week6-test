@@ -41,13 +41,15 @@ jobs:
       run: |
         docker tag iris-api us-central1-docker.pkg.dev/silicon-synapse-461513-v6/my-repo/iris-api:latest
         docker push us-central1-docker.pkg.dev/silicon-synapse-461513-v6/my-repo/iris-api:latest
-    - name: Install GKE Auth Plugin
-      run: |
-       curl -sSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo tee /usr/share/keyrings/cloud.google.gpg > /dev/null
-       echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
-       sudo apt-get update
-       sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
+    - name: Setup Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        project_id: silicon-synapse-461513-v6
+        service_account_key: ${{ secrets.GCP_KEY }}
+        export_default_credentials: true
 
+    - name: Configure Docker with Artifact Registry
+      run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
     - name: Deploy to GKE 
       run: |
