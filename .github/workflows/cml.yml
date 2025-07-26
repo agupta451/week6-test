@@ -47,6 +47,11 @@ jobs:
         project_id: silicon-synapse-461513-v6
         service_account_key: ${{ secrets.GCP_KEY }}
         export_default_credentials: true
+        install_components: 'gke-gcloud-auth-plugin'
+
+    - name: Install kubectl
+      run: gcloud components install kubectl
+
 
     - name: Configure Docker with Artifact Registry
       run: gcloud auth configure-docker us-central1-docker.pkg.dev
