@@ -41,6 +41,8 @@ jobs:
       run: |
         docker tag iris-api us-central1-docker.pkg.dev/silicon-synapse-461513-v6/my-repo/iris-api:latest
         docker push us-central1-docker.pkg.dev/silicon-synapse-461513-v6/my-repo/iris-api:latest
+    - name: Install GKE Auth Plugin
+      run: sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin
 
     - name: Deploy to GKE 
       run: |
