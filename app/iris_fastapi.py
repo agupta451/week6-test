@@ -5,7 +5,7 @@ import joblib
 import pandas as pd
 
 app = FastAPI(title="Iris Classifier API")
-model = joblib.load("model.joblib")
+model = joblib.load("./model.joblib")
 
 class IrisInput(BaseModel):
     sepal_length: float
